@@ -1,0 +1,43 @@
+project_id = "ipqmlizuuqswtmnukulw"
+
+[functions.wasender-webhook]
+verify_jwt = false
+
+[functions.wasender-sessions]
+verify_jwt = false
+
+[functions.send-seller-otp]
+verify_jwt = false
+
+[functions.verify-seller-otp]
+verify_jwt = false
+
+[functions.validate-seller-session]
+verify_jwt = false
+
+[functions.seller-dashboard-data]
+verify_jwt = false
+
+[functions.notify-buyers]
+verify_jwt = false
+
+[functions.onepay-callback]
+verify_jwt = false
+
+[functions.onepay-create-payment]
+verify_jwt = false
+
+[functions.waha-webhook]
+verify_jwt = false
+
+[functions.test-vps-upload]
+verify_jwt = false
+
+[functions.send-revenue-report]
+verify_jwt = false
+
+[functions.notify-admins-payment]
+verify_jwt = false
+
+[functions.ai-proxy]
+verify_jwt = false

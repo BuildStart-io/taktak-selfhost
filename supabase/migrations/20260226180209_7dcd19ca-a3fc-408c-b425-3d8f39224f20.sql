@@ -1,0 +1,1 @@
+ALTER TABLE public.listings ADD COLUMN additional_details jsonb DEFAULT '{}'::jsonb;
