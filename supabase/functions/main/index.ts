@@ -66,7 +66,8 @@ serve(async (req) => {
     return new Response("Function not found", { status: 404 });
   }
 
-  const handler = routes[functionName];
+  const cleanName = functionName ? functionName.replace(/-taktak$/, '') : '';
+  const handler = routes[functionName] || routes[cleanName];
 
   if (!handler) {
     return new Response("Function not found in routes", { status: 404 });

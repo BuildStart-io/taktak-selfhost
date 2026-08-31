@@ -13,14 +13,7 @@ declare
   service_key text := 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE2NDE3NjkyMDAsImV4cCI6MTc5OTUzNTYwMH0.xBBL5W0kwJrYsm8eQvJ-qpkEHyDmScIRMgmiO1gCMao';
   jobs text[][] := array[
     -- [job name, cron schedule, function name]
-    ['taktak-payment-followups',  '*/10 * * * *', 'send-payment-followups-taktak'],
-    ['taktak-referral-broadcast', '*/12 * * * *', 'send-referral-broadcast-taktak'],
-    ['taktak-notify-buyers',      '*/5 * * * *',  'notify-buyers-taktak'],
-    ['taktak-onepay-reconcile',   '*/5 * * * *',  'reconcile-onepay-pending-taktak'],
-    ['taktak-wasender-health',    '*/10 * * * *', 'wasender-health-taktak'],
-    ['taktak-waha-health',        '*/10 * * * *', 'waha-health-taktak'],
-    ['taktak-revenue-report',     '30 2 * * *',   'send-revenue-report-taktak'],
-    ['taktak-notion-analytics',   '0 3 * * *',    'push-notion-analytics-taktak']
+    -- add your jobs here
   ];
   j text[];
 begin
