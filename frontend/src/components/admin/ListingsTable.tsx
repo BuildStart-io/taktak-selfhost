@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Loader2, PauseCircle, PlayCircle, ShoppingBag, Trash2 } from "lucide-react";
+import { CheckCircle2, Loader2, PauseCircle, PlayCircle, ShoppingBag, Trash2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -46,6 +47,7 @@ const statusColors: Record<string, string> = {
 const ListingsTable = () => {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [acting, setActing] = useState<string | null>(null);
   const { toast } = useToast();
@@ -150,9 +152,17 @@ const ListingsTable = () => {
 
   const isActing = (listingId: string, action: string) => acting === `${action}:${listingId}`;
 
-  const pendingCount = listings.filter((l) => l.status === "pending_payment").length;
-  const pausedCount = listings.filter((l) => l.status === "pending" && l.payment_status === "paid").length;
-  const activeCount = listings.filter((l) => l.status === "active").length;
+  const filteredListings = listings.filter((l) => {
+    if (!searchQuery) return true;
+    const phone = l.marketplace_users?.phone_number || "";
+    const cleanQuery = searchQuery.replace(/\D/g, "");
+    if (!cleanQuery) return true;
+    return phone.includes(cleanQuery);
+  });
+
+  const pendingCount = filteredListings.filter((l) => l.status === "pending_payment").length;
+  const pausedCount = filteredListings.filter((l) => l.status === "pending" && l.payment_status === "paid").length;
+  const activeCount = filteredListings.filter((l) => l.status === "active").length;
 
   if (loading) {
     return (
@@ -167,18 +177,29 @@ const ListingsTable = () => {
 
   return (
     <div className="rounded-xl border border-border bg-card shadow-card animate-fade-in overflow-hidden">
-      <div className="flex items-center gap-2 border-b border-border px-6 py-4">
-        <ShoppingBag className="h-4 w-4 text-primary" />
-        <h3 className="text-sm font-semibold text-card-foreground">Recent Listings</h3>
-        <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span>{listings.length} listings</span>
-          <Badge variant="outline" className="border-warning/20 text-warning">{pendingCount} pending payments</Badge>
-          <Badge variant="outline" className="border-success/20 text-success">{activeCount} live</Badge>
-          <Badge variant="outline" className="border-border text-muted-foreground">{pausedCount} paused</Badge>
+      <div className="flex flex-col gap-4 border-b border-border px-6 py-4">
+        <div className="flex items-center gap-2">
+          <ShoppingBag className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-semibold text-card-foreground">Recent Listings</h3>
+          <div className="ml-auto flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span>{filteredListings.length} listings</span>
+            <Badge variant="outline" className="border-warning/20 text-warning">{pendingCount} pending payments</Badge>
+            <Badge variant="outline" className="border-success/20 text-success">{activeCount} live</Badge>
+            <Badge variant="outline" className="border-border text-muted-foreground">{pausedCount} paused</Badge>
+          </div>
+        </div>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by customer phone number..."
+            className="pl-9 max-w-sm h-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
 
-      {listings.length === 0 ? (
+      {filteredListings.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
           <ShoppingBag className="h-10 w-10 mb-3 opacity-40" />
           <p className="text-sm">No listings yet</p>
@@ -200,7 +221,7 @@ const ListingsTable = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {listings.map((listing) => (
+              {filteredListings.map((listing) => (
                 <tr key={listing.id} className="hover:bg-muted/20 transition-colors">
                   <td className="px-6 py-3">
                     <p className="text-sm font-medium text-card-foreground">{listing.title}</p>
