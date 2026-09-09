@@ -76,9 +76,10 @@ function isMissingSession(status: number, body: unknown) {
 }
 
 function sessionWebhookConfig() {
-  const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+  let supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+  if (supabaseUrl === "http://api-gw:8000") supabaseUrl = "https://supabase2.buildstart.io";
   const hookUrl = `${supabaseUrl}/functions/v1/waha-webhook-taktak`;
-  return hookUrl ? [{ url: hookUrl, events: ["message", "session.status"] }] : [];
+  return hookUrl ? [{ url: hookUrl, events: ["message", "session.status"], retries: { policy: "linear", delaySeconds: 2, attempts: 5 } }] : [];
 }
 
 async function createAndStartSession(session: string) {
@@ -315,7 +316,8 @@ export default async function(req: Request) {
     }
 
     if (action === "register_bot_webhook") {
-      const supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+      let supabaseUrl = (Deno.env.get("SUPABASE_URL") || "").replace(/\/+$/, "");
+      if (supabaseUrl === "http://api-gw:8000") supabaseUrl = "https://supabase2.buildstart.io";
       const hookUrl = `${supabaseUrl}/functions/v1/waha-webhook-taktak`;
       const infoRes = await wahaFetch(`/api/sessions/${enc}`);
       let existingConfig: any = {};
@@ -326,7 +328,7 @@ export default async function(req: Request) {
       const others = (existingConfig.webhooks || []).filter((w: any) => w?.url !== hookUrl);
       const newConfig = {
         ...existingConfig,
-        webhooks: [...others, { url: hookUrl, events: ["message", "session.status"] }],
+        webhooks: [...others, { url: hookUrl, events: ["message", "session.status"], retries: { policy: "linear", delaySeconds: 2, attempts: 5 } }],
       };
       const r = await wahaFetch(`/api/sessions/${enc}`, {
         method: "PUT",

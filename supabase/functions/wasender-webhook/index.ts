@@ -3066,7 +3066,7 @@ Expected beneficiary: "BuildStart (Pvt) Ltd", account "1001075073", bank "Commer
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
@@ -3331,7 +3331,7 @@ Payment slip means bank deposit/transfer receipt, ATM slip, online banking scree
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
