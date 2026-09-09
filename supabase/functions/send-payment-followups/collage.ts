@@ -9,7 +9,7 @@
 let _Image: any = null;
 async function loadImage(): Promise<any | null> {
   if (_Image) return _Image;
-  for (const s of ["https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm", "npm:imagescript@1.2.17", "https://esm.sh/imagescript@1.2.17", "https://deno.land/x/imagescript@1.2.17/mod.ts"]) {
+  for (const s of ["imagescript", "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm", "npm:imagescript@1.2.17", "https://esm.sh/imagescript@1.2.17", "https://deno.land/x/imagescript@1.2.17/mod.ts"]) {
     try {
       const mod = await import(s);
       if (mod?.Image) { _Image = mod.Image; return _Image; }

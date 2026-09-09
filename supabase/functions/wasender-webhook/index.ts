@@ -7,6 +7,7 @@ let _ImageMod: any = null;
 async function loadImage(): Promise<any | null> {
   if (_ImageMod) return _ImageMod;
   const sources = [
+    "imagescript",
     "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm",
     "npm:imagescript@1.2.17",
     "https://esm.sh/imagescript@1.2.17",
@@ -2189,8 +2190,11 @@ Default to Sinhala. Only switch to English if the user writes in English, or Tam
           const coverImage =
             allImages.find((u) => typeof u === "string" && u.startsWith("http")) || null;
 
+          const isCollageFailed = allImages.length > 1 && !allImages[0].includes("collage-");
+
           const previewCaption =
-            `👀 *ඔබගේ දැන්වීම Buyers දකින විදිහ:*\n\n` +
+            `👀 *ඔබගේ දැන්වීම Buyers දකින විදිහ:*\n` +
+            (isCollageFailed ? `\n_(ඔබ එවා ඇති ඡායාරූප ${allImages.length} ම දැන්වීමට ආරක්ෂිතව ඇතුළත් කර ඇත. පහසුව සඳහා මෙහි පෙන්වන්නේ එක් ඡායාරූපයක් පමණි)_\n\n` : `\n`) +
             formatListingCaption(
               {
                 title: title.trim(),

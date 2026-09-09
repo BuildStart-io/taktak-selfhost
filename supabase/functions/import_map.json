@@ -1,0 +1,5 @@
+{
+  "imports": {
+    "imagescript": "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm"
+  }
+}
