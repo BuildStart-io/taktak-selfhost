@@ -9,7 +9,7 @@ export interface ReferralConfig {
   bot_number: string;
 }
 
-export const DASHBOARD_LOGIN_URL = "https://taktak.buildstart.io/login";
+export const DASHBOARD_LOGIN_URL = "https://taktakmarket.buildstart.io/login";
 
 export const DEFAULT_REFERRAL: ReferralConfig = {
   enabled: true,

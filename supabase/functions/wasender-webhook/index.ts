@@ -111,11 +111,11 @@ const STORAGE_BUCKET = "listing-images";
 // URL we allow the AI to produce in free text is the dashboard. Programmatic
 // links (OnePay checkout, image URLs, seller storage URLs) are sent through
 // dedicated paths that bypass this sanitizer.
-const ALLOWED_URL_HOSTS = ["taktak.buildstart.io"];
+const ALLOWED_URL_HOSTS = ["taktakmarket.buildstart.io"];
 // Hosts whose URLs must pass through verbatim (payment gateways, WhatsApp
 // deep-links, etc.). These are inserted programmatically by trusted paths.
 const PASSTHROUGH_URL_HOSTS = ["onepay.lk", "ipg.onepay.lk", "wa.me", "api.whatsapp.com"];
-const CANONICAL_DASHBOARD_URL = "https://taktak.buildstart.io/login";
+const CANONICAL_DASHBOARD_URL = "https://taktakmarket.buildstart.io/login";
 
 function sanitizeOutgoingUrls(text: string): string {
   if (!text) return text;
@@ -126,7 +126,7 @@ function sanitizeOutgoingUrls(text: string): string {
         return match;
       }
       if (ALLOWED_URL_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) {
-        // Force any taktak.buildstart.io/* link to the canonical dashboard URL
+        // Force any taktakmarket.buildstart.io/* link to the canonical dashboard URL
         // (guards against the AI inventing paths like /seller-dashboard).
         return CANONICAL_DASHBOARD_URL;
       }
@@ -575,7 +575,7 @@ export default async function(req: Request) {
 
         // Check for DASHBOARD command
         if (aggregatedText.toLowerCase().trim() === "dashboard") {
-          const dashboardUrl = "https://taktak.buildstart.io/login";
+          const dashboardUrl = "https://taktakmarket.buildstart.io/login";
           const dashMsg = `📊 *TakTak Seller Dashboard*\n\nTrack your listings, views, and inquiries here:\n${dashboardUrl}\n\n🔑 Use your WhatsApp number (+${phone}) to login. We'll send you an OTP to verify.\n\n_Your dashboard updates in real-time as buyers interact with your listings!_`;
           await sendWhatsAppMessage(phone, dashMsg, sessionApiKey);
           await supabase.from("chat_messages").insert({
@@ -1974,10 +1974,10 @@ LISTING FEE (CRITICAL — NEVER HALLUCINATE PRICING):
 - Do NOT quote the fee or bank details unprompted during data collection — only when the user asks about pricing/payment, or after SYSTEM_CREATE_LISTING (the system message already includes them).
 
 LINKS (CRITICAL — NEVER HALLUCINATE URLS):
-- The ONLY seller dashboard URL is: *https://taktak.buildstart.io/login* — nothing else.
+- The ONLY seller dashboard URL is: *https://taktakmarket.buildstart.io/login* — nothing else.
 - NEVER send other URLs, preview links, "lovable.app" links, IP addresses, or any URL you invent.
 - The OnePay payment link is inserted automatically by the system after SYSTEM_CREATE_LISTING — do NOT generate or guess a payment link yourself.
-- If a user asks for the dashboard, use exactly: https://taktak.buildstart.io/login
+- If a user asks for the dashboard, use exactly: https://taktakmarket.buildstart.io/login
 - The user's referral wa.me link given in the REFERRAL PROGRAM section may be sent verbatim whenever they ask for it.${referralRule}
 
 Default to Sinhala. Only switch to English if the user writes in English, or Tamil if the user writes in Tamil.${firstReplyRule}${metaAutoRule}${stopAskingRule}`;
