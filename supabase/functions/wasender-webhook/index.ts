@@ -7,6 +7,7 @@ let _ImageMod: any = null;
 async function loadImage(): Promise<any | null> {
   if (_ImageMod) return _ImageMod;
   const sources = [
+    "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm",
     "npm:imagescript@1.2.17",
     "https://esm.sh/imagescript@1.2.17",
     "https://deno.land/x/imagescript@1.2.17/mod.ts",
