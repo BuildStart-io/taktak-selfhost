@@ -7,11 +7,7 @@ let _ImageMod: any = null;
 async function loadImage(): Promise<any | null> {
   if (_ImageMod) return _ImageMod;
   const sources = [
-    "imagescript",
-    "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm",
-    "npm:imagescript@1.2.17",
-    "https://esm.sh/imagescript@1.2.17",
-    "https://deno.land/x/imagescript@1.2.17/mod.ts",
+    "../_shared/imagescript.js",
   ];
   for (const s of sources) {
     try {
@@ -50,44 +46,33 @@ async function buildCollageAndUpload(supabase: any, seller_id: string, imageUrls
     const src = imageUrls.slice(0, 4);
     if (src.length < 2) return null; // no collage needed for a single image
 
-    const Image = await loadImage();
-    if (!Image) return null;
-
-    const tiles: any[] = [];
-    for (const u of src) {
-      try {
-        const r = await fetch(u);
-        if (!r.ok) continue;
-        const buf = new Uint8Array(await r.arrayBuffer());
-        const img = await Image.decode(buf);
-        // cover-fit to square tile
-        const side = Math.min(img.width, img.height);
-        const cropped = img.crop(Math.floor((img.width - side) / 2), Math.floor((img.height - side) / 2), side, side);
-        cropped.resize(COLLAGE_TILE, COLLAGE_TILE);
-        tiles.push(cropped);
-      } catch (e) {
-        console.error("collage tile decode failed", e);
-      }
-    }
-    if (tiles.length < 2) return null;
-
-    // pad to 4 by repeating last tile so grid stays symmetric
-    while (tiles.length < 4) tiles.push(tiles[tiles.length - 1].clone());
-
-    const canvas = new Image(COLLAGE_TILE * 2, COLLAGE_TILE * 2);
-    canvas.fill(0xffffffff);
-    canvas.composite(tiles[0], 0, 0);
-    canvas.composite(tiles[1], COLLAGE_TILE, 0);
-    canvas.composite(tiles[2], 0, COLLAGE_TILE);
-    canvas.composite(tiles[3], COLLAGE_TILE, COLLAGE_TILE);
-
-    const jpegBytes = await canvas.encodeJPEG(85);
-    const fileName = `${seller_id}/collage-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.jpg`;
     try {
-      const url = await uploadToVps(fileName, jpegBytes, "image/jpeg");
-      return url;
+      // Call the Python microservice running on the VPS natively
+      // The Edge Runtime is inside Docker on the VPS, so it can reach the host via the internal Docker gateway 172.17.0.1 or the public IP.
+      // Assuming 178.104.127.220 is the VPS IP where port 5000 is exposed.
+      const r = await fetch("http://178.104.127.220:5000/collage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: src }),
+      });
+      
+      if (!r.ok) {
+        console.error("Collage microservice failed with status", r.status, await r.text());
+        return null;
+      }
+      
+      const jpegBytes = await r.arrayBuffer();
+      const fileName = `${seller_id}/collage-${Date.now()}-${crypto.randomUUID().slice(0, 8)}.jpg`;
+      
+      try {
+        const url = await uploadToVps(fileName, jpegBytes, "image/jpeg");
+        return url;
+      } catch (e) {
+        console.error("collage upload failed", e);
+        return null;
+      }
     } catch (e) {
-      console.error("collage upload failed", e);
+      console.error("Failed to connect to collage microservice", e);
       return null;
     }
   } catch (e) {

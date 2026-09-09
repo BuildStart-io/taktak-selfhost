@@ -9,7 +9,7 @@
 let _Image: any = null;
 async function loadImage(): Promise<any | null> {
   if (_Image) return _Image;
-  for (const s of ["imagescript", "https://cdn.jsdelivr.net/npm/imagescript@1.2.17/+esm", "npm:imagescript@1.2.17", "https://esm.sh/imagescript@1.2.17", "https://deno.land/x/imagescript@1.2.17/mod.ts"]) {
+  for (const s of ["../_shared/imagescript.js"]) {
     try {
       const mod = await import(s);
       if (mod?.Image) { _Image = mod.Image; return _Image; }
@@ -47,39 +47,31 @@ export async function buildCollage(supabase: any, images: string[]): Promise<str
     const head = await fetch(publicUrl, { method: "HEAD" });
     if (head.ok) return publicUrl;
 
-    const Image = await loadImage();
-    if (!Image) return urls[0];
-
-    const decoded: any[] = [];
-    for (const url of urls) {
-      const res = await fetch(url);
-      if (!res.ok) continue;
-      const img = await Image.decode(new Uint8Array(await res.arrayBuffer()));
-      const scale = TARGET_H / img.height;
-      decoded.push(img.resize(Math.max(1, Math.round(img.width * scale)), TARGET_H));
-    }
-    if (decoded.length === 0) return urls[0];
-    if (decoded.length === 1) return urls[0];
-
-    const totalW = decoded.reduce((s, i) => s + i.width, 0) + GAP * (decoded.length + 1);
-    const canvas = new Image(totalW, TARGET_H + GAP * 2);
-    canvas.fill(0xffffffff);
-
-    let x = GAP;
-    for (const img of decoded) {
-      canvas.composite(img, x, GAP);
-      x += img.width + GAP;
-    }
-
-    const bytes = await canvas.encodeJPEG(82);
-    const { error } = await supabase.storage
-      .from(BUCKET)
-      .upload(path, bytes, { contentType: "image/jpeg", upsert: true, cacheControl: "31536000" });
-    if (error) {
-      console.warn("collage upload failed:", error.message);
+    try {
+      const r = await fetch("http://178.104.127.220:5000/collage-horizontal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: urls }),
+      });
+      
+      if (!r.ok) {
+        console.warn("collage microservice failed:", await r.text());
+        return urls[0];
+      }
+      
+      const bytes = await r.arrayBuffer();
+      const { error } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, bytes, { contentType: "image/jpeg", upsert: true, cacheControl: "31536000" });
+      if (error) {
+        console.warn("collage upload failed:", error.message);
+        return urls[0];
+      }
+      return publicUrl;
+    } catch (e) {
+      console.warn("failed to connect to collage microservice:", String(e));
       return urls[0];
     }
-    return publicUrl;
   } catch (e) {
     console.warn("collage build failed:", String(e));
     return urls[0];
